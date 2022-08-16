@@ -7,7 +7,9 @@ import NoticeWrongNetwork from './NoticeWrongNetwork';
 
 function Demo() {
 	const { state } = useEth();
-	const [value, setValue] = useState('?');
+	const [value, setValue] = useState();
+
+	console.log(state);
 
 	const demo = (
 		<>
@@ -21,6 +23,7 @@ function Demo() {
 	return (
 		<div className='demo'>
 			<h2>eKYC dAPP</h2>
+			<br />
 			{!state.artifact ? (
 				<NoticeNoArtifact />
 			) : !state.contract ? (

@@ -1,51 +1,58 @@
-import { useState } from "react";
-import useEth from "../../contexts/EthContext/useEth";
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import useEth from '../../contexts/EthContext/useEth';
 
 function ContractBtns({ setValue }) {
-  const { state: { contract, accounts } } = useEth();
-  const [inputValue, setInputValue] = useState("");
+	const {
+		state: { contract, accounts },
+	} = useEth();
+	const [inputValue, setInputValue] = useState('');
+	const [user, setUser] = useState({ userName: '', userType: '' });
+	const { register, handleSubmit } = useForm();
 
-  const handleInputChange = e => {
-    if (/^\d+$|^$/.test(e.target.value)) {
-      setInputValue(e.target.value);
-    }
-  };
+	const onSubmit = (data) => {
+		console.log(data);
+		addUser(data);
+	};
 
-  const read = async () => {
-    const value = await contract.methods.read().call({ from: accounts[0] });
-    setValue(value);
-  };
+	const addUser = async (data) => {
+		let result = await contract.methods
+			.addUser(data.userName, data.userType)
+			.send({ from: accounts[0] });
+		console.log(result);
+	};
 
-  const write = async e => {
-    if (e.target.tagName === "INPUT") {
-      return;
-    }
-    if (inputValue === "") {
-      alert("Please enter a value to write.");
-      return;
-    }
-    const newValue = parseInt(inputValue);
-    await contract.methods.write(newValue).send({ from: accounts[0] });
-  };
+	const getUser = async () => {
+		console.log(accounts[0]);
+		const _user = await contract.methods
+			.getUserByAddress(accounts[0])
+			.call({ from: accounts[0] });
+		console.log(_user);
+		console.log(_user['userName']);
+		console.log(_user['userType']);
+		setUser({ userName: _user['userName'], userType: _user['userType'] });
+	};
 
-  return (
-    <div className="btns">
+	useEffect(() => {}, [user]);
 
-      <button onClick={read}>
-        read()
-      </button>
-
-      <div onClick={write} className="input-btn">
-        write(<input
-          type="text"
-          placeholder="uint"
-          value={inputValue}
-          onChange={handleInputChange}
-        />)
-      </div>
-
-    </div>
-  );
+	return (
+		<>
+			<h1 id='welcome'>
+				Welcome {user.userName}! You are a type {user.userType} user.
+			</h1>
+			<div className='identity-stuff'>
+				<form onSubmit={handleSubmit(onSubmit)}>
+					<label htmlFor=''>User name</label>
+					<input {...register('userName')} />
+					<input {...register('userType')} />
+					<input type='submit' />
+				</form>
+			</div>
+			<div>
+				<button onClick={getUser}>Get User</button>
+			</div>
+		</>
+	);
 }
 
 export default ContractBtns;
