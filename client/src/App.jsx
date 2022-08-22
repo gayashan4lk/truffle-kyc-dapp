@@ -1,9 +1,8 @@
 import { BrowserRouter } from 'react-router-dom';
 import { EthProvider } from './contexts/EthContext';
 import './App.css';
-import Register from './components/Register/Register';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Profile from './components/Profile/Profile';
+import Router from './routes/router';
 
 function App() {
 	return (
@@ -11,8 +10,7 @@ function App() {
 			<EthProvider>
 				<div id='App'>
 					<div className='container'>
-						<Register />
-						<Profile />
+						<Router />
 					</div>
 				</div>
 			</EthProvider>
