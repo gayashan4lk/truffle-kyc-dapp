@@ -104,7 +104,7 @@ contract Identity {
     revert('NotFound');
   }
 
-  function getCredential(uint32 _id) public view returns (Credential memory) {
+  function getCredentialById(uint32 _id) public view returns (Credential memory) {
     return Credentials[_id];
   }
 }
