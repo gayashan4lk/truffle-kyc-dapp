@@ -3,221 +3,108 @@
 pragma solidity ^0.8.0;
 
 contract Identity {
-    uint32 private credentialId;
-    uint32 private credentialRecordId;
-    uint32 private verifyRecordId;
-    uint32 private issueRecordId;
+  uint32 private userId;
+  uint32 private credentialId;
+  uint32 private credentialRecordId;
+  uint32 private verifyRecordId;
+  uint32 private issueRecordId;
 
-    constructor(){
-        credentialId = 0;
-        credentialRecordId = 0;
-        verifyRecordId = 0;
-        issueRecordId = 0;
-    }
+  constructor(){
+    userId = 0;
+    credentialId = 0;
+    credentialRecordId = 0;
+    verifyRecordId = 0;
+    issueRecordId = 0;
+  }
 
-    enum UserType {
-        Issuer,
-        Holder,
-        Verifier
-    }
+  // This enum defines types of users.
+  enum UserType {
+    Issuer,
+    Holder,
+    Verifier
+  }
 
-    struct User {
-        string userName;
-        UserType userType;
-    }
+  // This struct stores data related to a 'User'.
+  struct User {
+    uint32 Id;
+    string Name;
+    UserType Type;
+  }
 
-    mapping(address => User) private Users;
+  // This mapping stores 'User' according to address.
+  mapping(address => User) private Users;
 
-    struct CredentialRecord {
-        address holderAddress;
-        uint32 credentialId;
-        string credentialDefinition;
-        uint32 createdAt;
-    }
+  // This struct stores data related to a 'Credential'.
+  struct Credential {
+    uint32 CredentialId;
+    address Holder;
+    string Definition;
+    uint32 CreatedAt;
+  }
 
-    mapping(address => mapping(uint32 => CredentialRecord)) private CredentialsRecordBook;
+  // This mapping stores 'Credential' according to CredentialId.
+  // credential id => Credential
+  mapping(uint32 => Credential) private Credentials;
 
-    struct IssueRecord {
-        address holderAddress;
-        address IssuerAddress;
-        uint32 credentialId;
-        bool isSigned;
-        uint32 createdAt;
-    }
+  // This mapping stores array of credential id per user id.
+  // user id => array of credential id.
+  mapping(uint32 => uint32[]) private CredentialsListByHolder;
 
-    mapping(address => mapping(uint32 => IssueRecord)) private IssueRecordBook;
-
-    struct VerifyRecord {
-        address holderAddress;
-        address verifierAddress;
-        uint32 credentialId;
-        bool isShared;
-        uint32 createdAt;
-    }
-
-    mapping(address => mapping(uint32 => VerifyRecord)) private VerifyRecordBook;
-
-
-    // This function creats a user.
-    // requires two parameters, Username and Usertype
-    // If Usertype equals one of "Issuer", "Holder", or "Verifier", a user is created and returns true.
-    // If Usertype is not equal to any of above, user is not created and returns false.
-    function addUser(
-        string memory _name,
-        string memory _type
-    ) public returns (bool) {
-        if (
-            keccak256(abi.encodePacked(_type)) == keccak256("Issuer") ||
-            keccak256(abi.encodePacked(_type)) == keccak256("Holder") ||
-            keccak256(abi.encodePacked(_type)) == keccak256("Verifier")
-        ) {
-            UserType _userType;
-            if (keccak256(abi.encodePacked(_type)) == keccak256("Issuer")) {
-                _userType = UserType.Issuer;
-            } else if (
-                keccak256(abi.encodePacked(_type)) == keccak256("Holder")
-            ) {
-                _userType = UserType.Holder;
-            } else if (
-                keccak256(abi.encodePacked(_type)) == keccak256("Verifier")
-            ) {
-                _userType = UserType.Verifier;
-            }
-            Users[msg.sender] = User(_name, _userType);
-
-            return true;
+  // This function creates a user.
+  // User data is added in 'Users' mapping.
+  // If a user created successfully retuns user id (user id is always greated than 0), otherwise retuns 0.
+  function addUser(string memory _name, string memory _type) public returns (uint32) {
+    if(
+      keccak256(abi.encodePacked(_type)) == keccak256("Issuer") ||
+      keccak256(abi.encodePacked(_type)) == keccak256("Holder") ||
+      keccak256(abi.encodePacked(_type)) == keccak256("Verifier")
+      )
+      {
+        uint32 _id = userId++;
+        UserType _userType;
+        if (keccak256(abi.encodePacked(_type)) == keccak256("Issuer")) {
+          _userType = UserType.Issuer;
+        } else if ( keccak256(abi.encodePacked(_type)) == keccak256("Holder")) {
+          _userType = UserType.Holder;
+        } else if ( keccak256(abi.encodePacked(_type)) == keccak256("Verifier")) {
+          _userType = UserType.Verifier;
         }
-        return false;
-    }
-
-    function getUserByAddress(address _address) public view returns (User memory) {
-        return (Users[_address]);
-    }
-
-    // This function creates a credential record.
-    // Only holders can create credentials.
-    // If msg.sender is a holder, credential is created and returns credentialsId.
-    // Otherwise credential is not created returns 0.
-    function addCredentialRecord(string memory _def) public returns (uint32) {
-        if (Users[msg.sender].userType == UserType.Holder) {
-            uint32 _recordId = credentialRecordId++;
-            uint32 _credId = credentialId++;
-            CredentialsRecordBook[msg.sender][_recordId] = CredentialRecord(
-                msg.sender,
-                _credId,
-                _def,
-                uint32(block.timestamp)
-            );
-            return _credId;
-        }
+        Users[msg.sender] = User(_id, _name, _userType);
+        return _id;
+      }
         return 0;
-    }
+  }
 
-    // This function returns a credentialRecord by address and credentialRecordId
-    function getCredentialsByOwner(address _address, uint32 _credRecordId)
-        public
-        view
-        returns (CredentialRecord memory)
-    {
+  // This function returns user details.
+  function getUser() public view returns (User memory) {
+    return (Users[msg.sender]);
+  }
 
-        return (CredentialsRecordBook[_address][_credRecordId]);
+  // If msg.sender is a Issuer and _holder is a Holder, a new credentials can be created.
+  // Data of new credential is stored in Credentials mapping. Id of new credential is stored in CredentialsListByHolder mapping.
+  // Holder address, credential definition has to be provided.
+  // if success credential id is retured. Otherwise 0 is returned.
+  function createCredential(address _holder, string memory _definition) public returns (uint32) {
+    if (Users[msg.sender].Type == UserType.Issuer && Users[_holder].Type == UserType.Holder) {
+      uint32 _credId = credentialId++;
+      uint32 _holderId = Users[_holder].Id;
+      Credentials[_credId] = Credential(_credId, _holder, _definition, uint32(block.timestamp));
+      CredentialsListByHolder[_holderId].push(_credId); 
+      return _credId;
     }
+    return 0;
+  }
 
-    // This function shares credentials with a verifier.
-    // Only a holder can share credentials.
-    function shareCredentials(
-        address _verifier,
-        uint32 _credentialRecordId
-    ) public returns (uint32) {
-        if (Users[msg.sender].userType == UserType.Holder && Users[_verifier].userType == UserType.Verifier) {
-            uint32 _id = verifyRecordId++;
-            VerifyRecordBook[msg.sender][_id] = VerifyRecord(
-                msg.sender,
-                _verifier,
-                _credentialRecordId,
-                true,
-                uint32(block.timestamp)
-            );
-            return (_id);
-        }
-        return 0;
+  // This functions retuns array of Credential ids according to the Holder.
+  function getAllCredentialIdsByHolder() public view returns (uint32[] memory) {
+    if (Users[msg.sender].Type == UserType.Holder) {
+      uint32 _holderId = getUser().Id;
+    return (CredentialsListByHolder[_holderId]);
     }
+    revert('NotFound');
+  }
 
-    // This function requests credentials from a holder.
-    // Only a verifier can request credentials.
-    function requestCredentials(
-        address _holder,
-        uint32 _credentialsId
-    ) public returns (uint32) {
-        if (Users[msg.sender].userType == UserType.Verifier && Users[_holder].userType == UserType.Holder) {
-            uint32 _id = verifyRecordId++;
-            VerifyRecordBook[msg.sender][_id] = VerifyRecord(
-                _holder,
-                msg.sender,
-                _credentialsId,
-                false,
-                uint32(block.timestamp)
-            );
-            return (_id);
-        }
-        return 0;
-    }
-
-    // This function returns a verify record by holder address and credential id.
-    function getRevealRecord(address _holder, uint32 _id)
-        public
-        view
-        returns (VerifyRecord memory)
-    {
-        return (VerifyRecordBook[_holder][_id]);
-    }
-
-    // This function creates a issue record to issue a credential.
-    // Only a issuer can create a issue record.
-    function issueCredentials(
-        address _holder,
-        uint32 _credentialsId
-    ) public returns (uint32) {
-        if (Users[msg.sender].userType == UserType.Issuer && Users[_holder].userType == UserType.Holder) {
-            uint32 _id = issueRecordId++;
-            IssueRecordBook[_holder][_id] = IssueRecord(
-                _holder,
-                msg.sender,
-                _credentialsId,
-                true,
-                uint32(block.timestamp)
-            );
-            return (_id);
-        }
-        return 0;
-    }
-
-    // This function creates a issue record to un-issue credential.
-    // Only a issuer can create a issue record.
-    function unIssueCredentials(
-        address _holder,
-        uint32 _credentialsId
-    ) public returns (uint32) {
-        if (Users[msg.sender].userType == UserType.Issuer && Users[_holder].userType == UserType.Holder) {
-            uint32 _id = issueRecordId++;
-            IssueRecordBook[msg.sender][_id] = IssueRecord(
-                _holder,
-                msg.sender,
-                _credentialsId,
-                false,
-                uint32(block.timestamp)
-            );
-            return (_id);
-        }
-        return 0;
-    }
-
-    // This function returns a verify record by holder address and credential id.
-    function getIssueRecord(address _holder, uint32 _id)
-        public
-        view
-        returns (IssueRecord memory)
-    {
-        return (IssueRecordBook[_holder][_id]);
-    }
+  function getCredential(uint32 _id) public view returns (Credential memory) {
+    return Credentials[_id];
+  }
 }
