@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Welcome from '../pages/welcome';
-import Register from '../components/Register/Register';
-import Profile from '../components/Profile/Profile';
+import Register from '../pages/register/register';
+import Profile from '../pages/profile/profile';
 
 const Router = () => {
 	return (
