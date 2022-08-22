@@ -1,13 +1,16 @@
 import { EthProvider } from './contexts/EthContext';
-import Demo from './components/Demo';
 import './App.css';
+import Register from './components/Register/Register';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Profile from './components/Profile/Profile';
 
 function App() {
 	return (
 		<EthProvider>
 			<div id='App'>
 				<div className='container'>
-					<Demo />
+					<Register />
+					<Profile />
 				</div>
 			</div>
 		</EthProvider>
