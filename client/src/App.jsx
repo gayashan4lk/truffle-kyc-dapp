@@ -1,3 +1,4 @@
+import { BrowserRouter } from 'react-router-dom';
 import { EthProvider } from './contexts/EthContext';
 import './App.css';
 import Register from './components/Register/Register';
@@ -6,14 +7,16 @@ import Profile from './components/Profile/Profile';
 
 function App() {
 	return (
-		<EthProvider>
-			<div id='App'>
-				<div className='container'>
-					<Register />
-					<Profile />
+		<BrowserRouter>
+			<EthProvider>
+				<div id='App'>
+					<div className='container'>
+						<Register />
+						<Profile />
+					</div>
 				</div>
-			</div>
-		</EthProvider>
+			</EthProvider>
+		</BrowserRouter>
 	);
 }
 
