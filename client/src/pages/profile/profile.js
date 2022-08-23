@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { set } from 'react-hook-form';
 import useEth from '../../contexts/EthContext/useEth';
 import LoadingCircle from '../../components/navigation/utilities/loadingCircle';
+import HolderView from './holderView';
+import IssuerView from './issuerView';
 
 function Profile() {
 	const {
@@ -60,7 +61,7 @@ function Profile() {
 
 	let pageContent;
 	if (isLoading) {
-		pageContent = <LoadingCircle />;
+		pageContent = <LoadingCircle contract={contract} accounts={accounts} />;
 	}
 	if (isSuccess) {
 		if (isRegistered) {
@@ -71,6 +72,8 @@ function Profile() {
 						<h5>Hi, {user.name}.</h5>
 						<h5>Id: {user.id}</h5>
 						<h5>User Type: {userType}</h5>
+						<IssuerView />
+						<HolderView account={accounts[0]} />
 					</div>
 				</>
 			);
