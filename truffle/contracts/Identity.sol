@@ -44,6 +44,8 @@ contract Identity {
 
   Credential[] private CredentialsList;
 
+  Credential[] private SharedCredentialsList;
+
   // This mapping stores 'Credential' according to CredentialId.
   // credential id => Credential
   mapping(uint32 => Credential) private Credentials;
@@ -113,5 +115,15 @@ contract Identity {
 
   function getAllCredentials() public view returns (Credential[] memory) {
     return CredentialsList;
+  }
+
+  function shareCredential(address _verifier, uint32 _id) public {
+    if (Users[msg.sender].Type == UserType.Holder && Users[_verifier].Type == UserType.Verifier) {
+      SharedCredentialsList.push(Credentials[_id]);
+    }
+  }
+
+  function getAllSharedCredentials() public view returns (Credential[] memory) {
+    return SharedCredentialsList;
   }
 }
