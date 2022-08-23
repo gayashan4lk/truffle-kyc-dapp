@@ -17,7 +17,7 @@ const SharePopup = () => {
 	const onSubmit = (data) => {
 		console.log(data);
 		setIsLoading(true);
-		//createCredential(data);
+		shareCredential(data);
 	};
 
 	const getCredentialById = async (id) => {
@@ -27,7 +27,12 @@ const SharePopup = () => {
 		return result;
 	};
 
-	const shareCredential = async (data) => {};
+	const shareCredential = async (data) => {
+		let result = await contract.methods
+			.shareCredential(data.verifier, data.id)
+			.send({ from: accounts[0] });
+		return result;
+	};
 
 	useEffect(() => {
 		(async () => {
