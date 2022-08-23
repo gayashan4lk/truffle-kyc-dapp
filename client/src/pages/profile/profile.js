@@ -3,43 +3,20 @@ import useEth from '../../contexts/EthContext/useEth';
 import LoadingCircle from '../../components/navigation/utilities/loadingCircle';
 import HolderView from './holderView';
 import IssuerView from './issuerView';
+import VerfierView from './verifierView';
 
 function Profile() {
 	const {
 		state: { contract, accounts },
 	} = useEth();
-	const [user, setUser] = useState({ address: '', id: '', name: '', type: '' });
-	const [isRegistered, setIsRegistered] = useState(false);
+
+	const [user, setUser] = useState({});
 	const [isLoading, setIsLoading] = useState(true);
-	const [isSuccess, setIsSuccess] = useState(false);
-	const [isError, setIsError] = useState(false);
 
-	useEffect(() => {
-		setIsRegistered(false);
-		const getUser = async () => {
-			console.log(accounts[0]);
-			const _user = await contract.methods
-				.getUser()
-				.call({ from: accounts[0] });
-
-			setUser({
-				address: accounts[0],
-				id: _user['Id'],
-				name: _user['Name'],
-				type: _user['Type'],
-			});
-			if (_user['Id'] > 0) {
-				setIsRegistered(true);
-			}
-		};
-		getUser().catch(console.error);
-		setIsLoading(false);
-		if (user) {
-			setIsSuccess(true);
-		} else {
-			setIsError(true);
-		}
-	}, [accounts]);
+	const getUser = async () => {
+		let result = await contract.methods.getUser().call({ from: accounts[0] });
+		return result;
+	};
 
 	const getUserType = (type) => {
 		let userType = '';
@@ -59,39 +36,56 @@ function Profile() {
 		return userType;
 	};
 
-	let pageContent;
-	if (isLoading) {
-		pageContent = <LoadingCircle contract={contract} accounts={accounts} />;
-	}
-	if (isSuccess) {
-		if (isRegistered) {
-			let userType = getUserType(user.type);
-			pageContent = (
-				<>
-					<div>
-						<h5>Hi, {user.name}.</h5>
-						<h5>Id: {user.id}</h5>
-						<h5>User Type: {userType}</h5>
-						<IssuerView />
-						<HolderView account={accounts[0]} />
-					</div>
-				</>
-			);
-		} else {
-			pageContent = (
-				<div>
-					<h3>You are a invalied user. Please Register.</h3>
-					<a href='/register'>Register Me</a>
-				</div>
-			);
+	const getUserConcent = (type) => {
+		let content = '';
+		switch (type) {
+			case '0':
+				content = <IssuerView />;
+				break;
+			case '1':
+				content = <HolderView />;
+				break;
+			case '2':
+				content = <VerfierView />;
+				break;
+			default:
+				break;
 		}
-	}
+		return content;
+	};
 
-	return (
-		<div>
-			<div>{pageContent}</div>
-		</div>
-	);
+	useEffect(() => {
+		if (accounts) {
+			(async () => {
+				setIsLoading(true);
+				let result = await getUser();
+				setUser(result);
+			})();
+			setIsLoading(false);
+		}
+	}, [accounts]);
+
+	if (!isLoading) {
+		return (
+			<div>
+				{user.Id >= 0 ? (
+					<>
+						<h1>{user.Name}</h1>
+						<h3>{getUserType(user.Type)}</h3>
+						<h3>Id : {user.Id}</h3>
+						<div>{getUserConcent(user.Type)}</div>
+					</>
+				) : (
+					<>
+						<h3>You are a invalied user. Please Register.</h3>
+						<a href='/register'>Register Me</a>
+					</>
+				)}
+			</div>
+		);
+	} else {
+		return <LoadingCircle />;
+	}
 }
 
 export default Profile;
