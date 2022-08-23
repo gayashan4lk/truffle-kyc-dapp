@@ -42,6 +42,8 @@ contract Identity {
     uint32 CreatedAt;
   }
 
+  Credential[] private CredentialsList;
+
   // This mapping stores 'Credential' according to CredentialId.
   // credential id => Credential
   mapping(uint32 => Credential) private Credentials;
@@ -90,6 +92,7 @@ contract Identity {
       uint32 _holderId = Users[_holder].Id;
       Credentials[_credId] = Credential(_credId, _holder, _definition, uint32(block.timestamp));
       CredentialsListByHolder[_holderId].push(_credId); 
+      CredentialsList.push(Credential(_credId, _holder, _definition, uint32(block.timestamp)));
       return _credId;
     }
     return 0;
@@ -106,5 +109,9 @@ contract Identity {
 
   function getCredentialById(uint32 _id) public view returns (Credential memory) {
     return Credentials[_id];
+  }
+
+  function getAllCredentials() public view returns (Credential[] memory) {
+    return CredentialsList;
   }
 }
