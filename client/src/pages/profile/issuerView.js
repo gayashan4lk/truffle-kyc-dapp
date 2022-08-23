@@ -73,7 +73,7 @@ const IssuerView = () => {
 
 	return (
 		<div>
-			<h3>Issue a certificate</h3>
+			<h5>Issue a certificate</h5>
 			{pageContent}
 		</div>
 	);
