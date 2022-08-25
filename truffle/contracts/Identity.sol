@@ -42,10 +42,13 @@ contract Identity {
     uint32 CreatedAt;
   }
 
+  //This array stores all the credentials
   Credential[] private CredentialsList;
 
+  // This array stores all the shared credentials
   Credential[] private SharedCredentialsList;
 
+  //****/
   // This mapping stores 'Credential' according to CredentialId.
   // credential id => Credential
   mapping(uint32 => Credential) private Credentials;
@@ -116,12 +119,11 @@ contract Identity {
     }
     revert('NotFound');
   }
- //*******************/
-
 
   function getCredentialById(uint32 _id) public view returns (Credential memory) {
     return Credentials[_id];
   }
+  //*******************/
 
   function getAllCredentials() public view returns (Credential[] memory) {
     return CredentialsList;
