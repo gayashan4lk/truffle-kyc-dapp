@@ -15,7 +15,6 @@ const SharePopup = () => {
 	const { id } = useParams();
 
 	const onSubmit = (data) => {
-		console.log(data);
 		setIsLoading(true);
 		shareCredential(data);
 	};

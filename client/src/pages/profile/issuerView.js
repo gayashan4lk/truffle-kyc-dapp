@@ -16,7 +16,6 @@ const IssuerView = () => {
 	const [isSuccess, setIsSuccess] = useState(false);
 
 	const onSubmit = (data) => {
-		console.log(data);
 		setIsLoading(true);
 		createCredential(data);
 	};
@@ -25,7 +24,6 @@ const IssuerView = () => {
 		let result = await contract.methods
 			.createCredential(data.holder, data.definition)
 			.send({ from: accounts[0] });
-		console.log(result);
 		if (result) {
 			setIsLoading(false);
 			if (result.status) {
