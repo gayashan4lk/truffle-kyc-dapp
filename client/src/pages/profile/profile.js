@@ -77,6 +77,7 @@ function Profile() {
 								<Card.Body>
 									<h3>
 										<Badge bg='danger'>{getUserType(user.Type)}</Badge>
+										<span> </span>
 										<span className='ml-5'>{user.Name}</span>
 									</h3>
 								</Card.Body>
