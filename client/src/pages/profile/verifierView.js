@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import useEth from '../../contexts/EthContext/useEth';
 import LoadingCircle from '../../components/navigation/utilities/loadingCircle';
+import { Table } from 'react-bootstrap';
 
 const VerfierView = () => {
 	const {
@@ -29,17 +30,29 @@ const VerfierView = () => {
 	if (!isLoading) {
 		return (
 			<div>
-				<table>
+				<Table striped bordered hover>
+					<thead>
+						<tr>
+							<th>Holder Address</th>
+							<th>Credentials Details</th>
+							<th>Action</th>
+						</tr>
+					</thead>
 					<tbody>
 						{data.map((cred) => (
 							<tr key={cred.CredentialId}>
-								<td>{cred.CredentialId}</td>
+								<td>{cred.Holder}</td>
 								<td>{cred.Definition}</td>
-								<td></td>
+								<td>
+									{' '}
+									<a href='' className='btn btn-primary'>
+										View
+									</a>
+								</td>
 							</tr>
 						))}
 					</tbody>
-				</table>
+				</Table>
 			</div>
 		);
 	} else {

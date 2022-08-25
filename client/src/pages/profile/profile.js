@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import useEth from '../../contexts/EthContext/useEth';
 import LoadingCircle from '../../components/navigation/utilities/loadingCircle';
+import Badge from 'react-bootstrap/Badge';
+import Card from 'react-bootstrap/Card';
 import HolderView from './holderView';
 import IssuerView from './issuerView';
 import VerfierView from './verifierView';
@@ -36,7 +38,7 @@ function Profile() {
 		return userType;
 	};
 
-	const getUserConcent = (type) => {
+	const getUserContent = (type) => {
 		let content = '';
 		switch (type) {
 			case '0':
@@ -70,14 +72,21 @@ function Profile() {
 			<div>
 				{user.Id >= 0 ? (
 					<>
-						<h1>{user.Name}</h1>
-						<h3>{getUserType(user.Type)}</h3>
-						<h3>Id : {user.Id}</h3>
-						<div>{getUserConcent(user.Type)}</div>
+						<div className='mt-2 mb-2'>
+							<Card>
+								<Card.Body>
+									<h3>
+										<Badge bg='danger'>{getUserType(user.Type)}</Badge>
+										<span className='ml-5'>{user.Name}</span>
+									</h3>
+								</Card.Body>
+							</Card>
+						</div>
+						<div>{getUserContent(user.Type)}</div>
 					</>
 				) : (
 					<>
-						<h3>You are a invalied user. Please Register.</h3>
+						<h5>You are a invalied user. Please Register.</h5>
 						<a href='/register'>Register Me</a>
 					</>
 				)}
