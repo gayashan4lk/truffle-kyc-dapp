@@ -16,7 +16,6 @@ const IssuerView = () => {
 	const [isSuccess, setIsSuccess] = useState(false);
 
 	const onSubmit = (data) => {
-		console.log(data);
 		setIsLoading(true);
 		createCredential(data);
 	};
@@ -25,7 +24,6 @@ const IssuerView = () => {
 		let result = await contract.methods
 			.createCredential(data.holder, data.definition)
 			.send({ from: accounts[0] });
-		console.log(result);
 		if (result) {
 			setIsLoading(false);
 			if (result.status) {
@@ -56,10 +54,10 @@ const IssuerView = () => {
 						/>
 					</Form.Group>
 					<Form.Group className='mb-3' controlId='certificateDetails'>
-						<Form.Label>Certificate Details</Form.Label>
+						<Form.Label>Credential Details</Form.Label>
 						<Form.Control
 							type='text'
-							placeholder='Enter Cerificate'
+							placeholder='Enter Credential Details'
 							{...register('definition')}
 						/>
 					</Form.Group>

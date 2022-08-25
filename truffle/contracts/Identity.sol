@@ -42,10 +42,13 @@ contract Identity {
     uint32 CreatedAt;
   }
 
+  //This array stores all the credentials
   Credential[] private CredentialsList;
 
+  // This array stores all the shared credentials
   Credential[] private SharedCredentialsList;
 
+  //****/
   // This mapping stores 'Credential' according to CredentialId.
   // credential id => Credential
   mapping(uint32 => Credential) private Credentials;
@@ -73,6 +76,8 @@ contract Identity {
         } else if ( keccak256(abi.encodePacked(_type)) == keccak256("Verifier")) {
           _userType = UserType.Verifier;
         }
+        // msg.sender is the address of the current user.
+        // Just like dictionary collection type in C#
         Users[msg.sender] = User(_id, _name, _userType);
         return _id;
       }
@@ -80,6 +85,7 @@ contract Identity {
   }
 
   // This function returns user details.
+  // memory keyword!
   function getUser() public view returns (User memory) {
     return (Users[msg.sender]);
   }
@@ -88,18 +94,23 @@ contract Identity {
   // Data of new credential is stored in Credentials mapping. Id of new credential is stored in CredentialsListByHolder mapping.
   // Holder address, credential definition has to be provided.
   // if success credential id is retured. Otherwise 0 is returned.
-  function createCredential(address _holder, string memory _definition) public returns (uint32) {
+  function createCredential(address _holder, string memory _desc) public returns (uint32) {
     if (Users[msg.sender].Type == UserType.Issuer && Users[_holder].Type == UserType.Holder) {
       uint32 _credId = credentialId++;
       uint32 _holderId = Users[_holder].Id;
-      Credentials[_credId] = Credential(_credId, _holder, _definition, uint32(block.timestamp));
+
+      // Credentias mapping
+      Credentials[_credId] = Credential(_credId, _holder, _desc, uint32(block.timestamp));
       CredentialsListByHolder[_holderId].push(_credId); 
-      CredentialsList.push(Credential(_credId, _holder, _definition, uint32(block.timestamp)));
+
+      // CredentialsList array
+      CredentialsList.push(Credential(_credId, _holder, _desc, uint32(block.timestamp)));
       return _credId;
     }
     return 0;
   }
 
+  //*******************/
   // This functions retuns array of Credential ids according to the Holder.
   function getAllCredentialIdsByHolder() public view returns (uint32[] memory) {
     if (Users[msg.sender].Type == UserType.Holder) {
@@ -112,6 +123,7 @@ contract Identity {
   function getCredentialById(uint32 _id) public view returns (Credential memory) {
     return Credentials[_id];
   }
+  //*******************/
 
   function getAllCredentials() public view returns (Credential[] memory) {
     return CredentialsList;
